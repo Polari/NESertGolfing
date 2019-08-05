@@ -13,6 +13,7 @@
 .segment "ZEROPAGE"
 _ptr:          .res 2 ; shared pointer for C interface
 _seed:         .res 4 ; random number seed (only using low 3 bytes)
+_levelseed:	   .res 4 ; second random seed for fixed levels
 ppu_post_mode: .res 1
 sound_ptr:     .res 2
 _input:        .res 16
@@ -106,7 +107,7 @@ _palette:        .res 32
 _oam: .res 256
 
 .exportzp _ptr
-.exportzp _seed
+.exportzp _seed, _levelseed
 .exportzp _input, _gamepad, _mouse1, _mouse2, _mouse3
 .exportzp _i,_j,_k,_l
 .exportzp _mx,_nx,_ox,_px
@@ -868,6 +869,7 @@ lsr4: ; logical shift right 4 bits
 
 .export _prng
 .export _prng1
+.export _prnglevel
 .export _mouse_sense
 .export _input_setup
 .export _input_poll
@@ -902,6 +904,23 @@ prng1:
 	eor #$1B
 :
 	sta _seed+0
+	rts
+	
+_prnglevel:
+	ldx #8
+prnglevel:
+	lda _levelseed+0
+:
+	asl
+	rol _levelseed+1
+	rol _levelseed+2
+	bcc :+
+	eor #$1B
+:
+	dex
+	bne :--
+	sta _levelseed+0
+	;ldx #0 ; clear high bits of return value
 	rts
 
 input_poll_raw:
