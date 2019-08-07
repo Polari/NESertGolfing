@@ -1,6 +1,6 @@
-# NESert Golfing (fixed levels)
+# NESert Golfing Mystery Edition
 
-A 2D golf game for the NES, directly inspired by [Desert Golfing](https://captaingames.itch.io/desert-golfing).
+NESert Golfing is a 2D golf game for the NES, directly inspired by [Desert Golfing](https://captaingames.itch.io/desert-golfing).
 
 Brad Smith, 2019. 
 
@@ -10,7 +10,7 @@ https://rainwarrior.itch.io/nesert-golfing
 Author's website:
 http://rainwarrior.ca
 
-Plus a quick and dirty hack to force the generated levels to be the same every time, making the game more suitable for [blind racing](https://mystery.beatthega.me)
+Mystery Edition is a quick and dirty hack to fix the environment randomness across different playthroughs, making the game more suitable for [blind racing](http://mystery.beatthega.me).
 
 Kosti Jokinen, 2019.
 
