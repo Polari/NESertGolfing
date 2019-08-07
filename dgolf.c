@@ -74,6 +74,7 @@ extern sint8 mouse3;
 
 extern uint8 prng(); // 8-bit random value
 extern uint8 prng1(); // "fast" random value, only bit 0 is truly random (bits 1-7 have increasing entropy)
+extern void cycle_weather_e(); // cycles weather effect counter
 extern void mouse_sense(); // cycles sensitivity setting (doesn't work on Hyperkin clone)
 extern void input_setup();
 extern void input_poll();
@@ -140,6 +141,7 @@ extern uint8 floor_column;
 extern uint8 weather_tile;
 extern uint8 weather_attribute;
 extern sint8 weather_wind_dir;
+extern uint8 weather_wind_e;
 extern uint8 weather_wind_p;
 extern uint8 weather_rate_min;
 extern uint8 weather_rate_mask;
@@ -166,6 +168,7 @@ extern sint16 norm_y;
 #pragma zpsym("weather_tile")
 #pragma zpsym("weather_attribute")
 #pragma zpsym("weather_wind_dir")
+#pragma zpsym("weather_wind_e")
 #pragma zpsym("weather_wind_p")
 #pragma zpsym("weather_rate_min")
 #pragma zpsym("weather_rate_mask")
@@ -866,6 +869,7 @@ void flag_animate()
 void frame()
 {
 	if (transition) transition_animate();
+	cycle_weather_e();
 	weather_fade();
 	weather_animate();
 	flag_animate();
@@ -1513,6 +1517,12 @@ void hole_play()
 	uint16 t = (tee_cx - (6*8)) & 511; // target scroll position
 	while (scroll_cx != t)
 	{
+		// build entropy
+		prng();
+		prng();
+		prng();
+		prng();
+		
 		// build one more pixel of floor
 		floor_build_pixel();
 		floor_render_prepare(scroll_cx & 7);
@@ -1874,7 +1884,7 @@ void hole_play()
 
 		collide_skip:
 			// apply wind only if not colliding or on ground
-			if (weather_rate_min && (prng1() < weather_wind_p))
+			if (weather_rate_min && (weather_wind_e < weather_wind_p))
 				ball_vx += weather_wind_dir * WIND;
 		
 		collide_done:

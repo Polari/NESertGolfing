@@ -41,6 +41,7 @@ _floor_column:      .res 1
 _weather_tile:      .res 1
 _weather_attribute: .res 1 ; bits 2-4 are speed of descent
 _weather_wind_dir:  .res 1 ; wind direction: 0, 1, or -1
+_weather_wind_e:	.res 1 ; wind effect, cycles and gets compared to weather_wind_p
 _weather_wind_p:    .res 1 ; wind probability 0 = never, 255 = almost 1 per frame
 _weather_rate_min:  .res 1 ; minimum wait until next spawn
 _weather_rate_mask: .res 1 ; prng mask add until next spawn
@@ -116,6 +117,7 @@ _oam: .res 256
 .exportzp _weather_tile
 .exportzp _weather_attribute
 .exportzp _weather_wind_dir
+.exportzp _weather_wind_e
 .exportzp _weather_wind_p
 .exportzp _weather_rate_min
 .exportzp _weather_rate_mask
@@ -198,7 +200,7 @@ _SPRITE_CHR_SIZE: .word * - _sprite_chr
 ;norm_y0/1
 
 .segment "CODE"
-
+	
 _read_slope:
 	tay
 	ldx slope_y1, Y
@@ -517,10 +519,10 @@ spawn:
 	sta _oam + 1, Y
 	lda _weather_attribute
 	sta _oam + 2, Y
-	jsr _prng ; X
+	jsr _cycle_weather_e ; X
 	sta _oam + 3, Y
 	; set time until next spawn
-	jsr _prng
+	jsr _cycle_weather_e
 	and _weather_rate_mask
 	clc
 	adc _weather_rate_min
@@ -549,7 +551,7 @@ animate_loop:
 	sta _oam + 0, X
 	; wind
 	:
-		jsr prng1
+		jsr _cycle_weather_e
 		cmp _weather_wind_p
 		bcs :+
 			lda _oam + 3, X
@@ -866,6 +868,7 @@ lsr4: ; logical shift right 4 bits
 ; Utilities
 ; =========
 
+.export _cycle_weather_e
 .export _prng
 .export _prng1
 .export _mouse_sense
@@ -873,6 +876,12 @@ lsr4: ; logical shift right 4 bits
 .export _input_poll
 
 .segment "CODE"
+
+_cycle_weather_e:
+	lda _weather_wind_e
+	adc #59
+	sta _weather_wind_e
+	rts
 
 _prng:
 	ldx #8
