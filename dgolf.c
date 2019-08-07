@@ -43,7 +43,6 @@ typedef   signed long  int sint32;
 
 extern uint8* ptr;
 extern uint32 seed; // 24-bit random seed, don't set to 0
-extern uint32 levelseed; // 24-bit random seed, don't set to 0
 extern uint8 i, j, k, l;
 extern uint16 mx,nx,ox,px;
 extern sint16 ux,vx;
@@ -75,7 +74,6 @@ extern sint8 mouse3;
 
 extern uint8 prng(); // 8-bit random value
 extern uint8 prng1(); // "fast" random value, only bit 0 is truly random (bits 1-7 have increasing entropy)
-extern uint8 prnglevel(); // level-exclusive random value
 extern void mouse_sense(); // cycles sensitivity setting (doesn't work on Hyperkin clone)
 extern void input_setup();
 extern void input_poll();
@@ -598,8 +596,8 @@ void floor_build_pixel_calculate_range()
 
 void floor_build_pixel_angle()
 {
-	fg_hold = (prnglevel() & fg_hold_mask) + 8;
-	fg_angle = prnglevel() & fg_angle_mask;
+	fg_hold = (prng() & fg_hold_mask) + 8;
+	fg_angle = prng() & fg_angle_mask;
 
 	// drive toward centre
 	if      (fg_last < fg_min_soft) fg_angle &= 0x7F;
@@ -723,7 +721,7 @@ void hole_next()
 	if (i < 34) i = 34; // must be at least 2 tiles offscreen
 	k = j - i; // allowed range
 	if (k == 0 || k >= 16) k = 1; // prevent invalid ranges (shouldn't occur?)
-	l = i + (prnglevel() % k); // new hole column
+	l = i + (prng() % k); // new hole column
 
 	ASSERT((scroll_cx & 7) == 0);
 	if (!hole)
@@ -798,10 +796,10 @@ void weather_wind_random()
 
 void weather_fade()
 {
-	if (weather_wind_timeout == 0)
-		weather_wind_random();
-	else
-		--weather_wind_timeout;
+//	if (weather_wind_timeout == 0)
+//		weather_wind_random();
+//	else
+//		--weather_wind_timeout;
 	
 	// smoothly change wind
 	if (weather_wind_dir != weather_wind_fade_dir)
@@ -1025,7 +1023,7 @@ void title()
 	ocean_attribute = 255;
 	flag_remove = 0;
 	course = 0;
-	field_set = prnglevel() & 15;
+	field_set = prng() & 15;
 	pal_floor    = set_f[field_set];
 	pal_sky      = set_s[field_set];
 	pal_text     = set_t[field_set];
@@ -1037,8 +1035,8 @@ void title()
 	weather_wind_dir = weather_wind_fade_dir;
 	weather_attribute_set();
 	transition = 0;
-	transition_time = (prnglevel() & 7) + 3;
-	day = prnglevel() & 7;
+	transition_time = (prng() & 7) + 3;
+	day = prng() & 7;
 
 	// keep hole and start off the field for menu
 	hole_cx = 512;
@@ -1051,7 +1049,7 @@ void title()
 	fg_angle_mask = 0x80 | 0x3F; // shallow hills
 	floor_build_pixel_calculate_range();
 	fg_hold_mask = 7; // short hills
-	fg_last = fg_min + (prnglevel() % (fg_max - fg_min));
+	fg_last = fg_min + (prng() % (fg_max - fg_min));
 	fg_hold = 0;
 	for (mx = 0; mx < 256; ++mx) floor_build_pixel();
 	fg_min = (176+3) * 256; // 3 pixels below menu
@@ -1168,7 +1166,6 @@ void title()
 			}
 		}
 
-		prng(); // build up entropy
 		++frame_count;
 		
 		// colour cycle the cursor
@@ -1628,7 +1625,6 @@ void hole_play()
 		do
 		{
 			input_poll();
-			prng1(); // entropy
 			hole_draw();
 			frame();
 			#if HOLE_SKIP
@@ -1682,7 +1678,6 @@ void hole_play()
 			if (swing_y >  SWING_MAX) swing_y =  SWING_MAX;
 			if (swing_y < -SWING_MAX) swing_y = -SWING_MAX;
 			
-			prng1(); // entropy
 			hole_draw();
 			frame();
 		}
@@ -2005,8 +2000,8 @@ void hole_play()
 	}
 	else if (transition_time == 0)
 	{
-		field_set = (prnglevel() & 7) | (field_set & 8); // random but don't switch day/night
-		transition_time = (prnglevel() & 7) + 3;
+		field_set = (prng() & 7) | (field_set & 8); // random but don't switch day/night
+		transition_time = (prng() & 7) + 3;
 	field_change:
 		transition = TRANSITION_TIME;
 		i = set_w[field_set];
@@ -2051,7 +2046,7 @@ void main()
 	// with two hand-picked cases to make the title screen look nice.
 	// (further entropy for subsequent holes is gathered while waiting on the
 	// title screen, but I have to generate at least the title screen before user input.)
-	levelseed = 0x00654321; // field set 7 (yellow day), 4 holes to night
+	seed = 0x00654321; // field set 7 (yellow day), 4 holes to night
 
 	input_setup();
 
