@@ -1757,7 +1757,7 @@ void hole_play()
 			if (ball_y >= (256*256))
 			{
 				balls_hx[player*4] = 1; // offscreen
-				goto collide_skip;
+				goto collide_done;
 			}
 
 			// final hole water test
@@ -1775,6 +1775,7 @@ void hole_play()
 			mx = (ball_x / 256) + 1; // start at left column of ball
 			l = (ball_y / 256) + 5; // bottom row of ball
 			px = 0; // best priority column
+			ox = 0; // proximity to ground detected flag
 			k = 13; // best priority
 			valley = 0;
 			for (i=0; i<(5*4); i+=4)
@@ -1785,6 +1786,10 @@ void hole_play()
 				nx = (nx + scroll_cx) & 511;
 				++mx;
 				j = floor_y[nx];
+				// set ground proximity flag if close to ground
+				// doesn't really matter if we're actually a pixel off or whatever
+				if ((l + 1) >= j)
+					ox = 1;
 				if (l >= j) // possible overlap
 				{
 					j = l-j;
@@ -1805,7 +1810,11 @@ void hole_play()
 					}
 				}
 			}
-			if (k >= 13) goto collide_skip; // no pixel collision detected
+			if (k >= 13) { // no collision detected
+				if (ox != 0) // close to ground though, maybe even rolling on level ground
+					goto collide_done;
+				goto collide_weather;
+			}
 			
 			// if ball lands offscreen, don't try to collide
 			// (this speeds up recovery for the next shot, but also avoids
@@ -1882,7 +1891,7 @@ void hole_play()
 
 			goto collide_done;
 
-		collide_skip:
+		collide_weather:
 			// apply wind only if not colliding or on ground
 			if (weather_rate_min && (weather_wind_e < weather_wind_p))
 				ball_vx += weather_wind_dir * WIND;
