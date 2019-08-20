@@ -5,7 +5,9 @@
 //
 
 const char rom_version[] = " ################  "
-	"NESert Golfing version 1.3 by Brad Smith, 2019"
+	"NESert Golfing Mystery Edition"
+	"Forked from NESert Golfing version 1.3 by Brad Smith, 2019"
+	"Some additional changes by Kosti Jokinen, 2019"
 	"  ################ ";
 
 // for debugging performance
@@ -903,16 +905,16 @@ void delay(uint8 frames)
 //
 
 const char help_text[] =
-	"       NESert Golfing\n"
-	"      Brad Smith, 2019\n"
+	"NESert Golfing Mystery Edition\n"
+	" Original by Brad Smith, 2019\n"
 	"   http://rainwarrior.ca\n"
+	" Some changes by Kosti Jokinen\n"
 	"\n"
 	"GAMEPAD CONTROL:\n"
 	"  Hold A to begin swing,\n"
 	"  use directions to aim,\n"
 	"  release to stroke.\n"
 	"  Hold B for fine control.\n"
-	"\n"
 	"MOUSE CONTROL:\n"
 	"  Hold left button to begin\n"
 	"  swing, drag to aim,\n"
